@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>dn-hello组件</title>
+</head>
+<body>
+    <template id="dn-hello">
+      <style>
+            h1{
+                  background: green;
+                  color: red;
+            }
+      </style>
+      <h1 id="hello">123</h1>
+    </template>
+    <script>
+    // 解决的问题 如何吧template 的内容加入到<dn-hello>标签中
+    // 无非是操作dom对象，肯定要获取dom对象
+    // 第一步是获取对象
+    // var indexDoc =document.getElementById("dn-hello") // null
+ 
+    // var indexDoc =document.getElementById("dn-hello") // 
+    // console.log(indexDoc)
+    // currentScript 返回其包含的脚本中正在执行的script标签元素
+    // ownerDocument 以document对象的形式返回节点的Document（html对象）
+    var indexDoc=document // 代表的时index.html 的文档对象
+    var currentDoc =document.currentScript.ownerDocument; // 获取dn-hello 文档对象
+    var temp1 =currentDoc.getElementById("dn-hello") // 获取template对象
+    // 注册元素 因为自定义的标签不具备html对象的一些属性和方法
+      // 创建一个新的元素原型对象
+    var helloProto =Object.create(HTMLElement.prototype)
+    // 实现显示组件 回调函数
+        // 当dn-hello 标签注册成功会触发这个属性  createdCallback
+        // 也就是相当于ajax 里面的 onreadystatechange
+    helloProto.createdCallback=function(){
+      // 创建虚拟dom this代表的是dn-hello对象 因为这个function 是在dn-hello被注册时才执行
+      var root =this.createShadowRoot() // 这个隐式dom创建在index.html 阴式dom相当于开辟了一个独立的空间
+      root.appendChild(indexDoc.importNode(temp1.content,true))// 倒入的节点 主要时把模板里面的对象导入indexDoc对象中
+      // 灵活定义文字信息
+      root.getElementById('hello').innerHTML =this.getAttribute('msg')
+      // this.innerHTML=temp1.innerHTML
+
+    }
+    var hello=indexDoc.registerElement('dn-hello',{
+      prototype:helloProto
+    })
+
+    </script>
+</body>
+</html>
